@@ -1,0 +1,50 @@
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `user`@`%` 
+    SQL SECURITY DEFINER
+VIEW `orderview` AS
+    SELECT 
+        `a`.`Order_idOrder` AS `OrderID`,
+        `a`.`quantity` AS `quantity`,
+        (`b`.`menuCost` * `a`.`quantity`) AS `cost`
+    FROM
+        (`orderdetail` `a`
+        JOIN `menucost` `b`)
+    WHERE
+        (`a`.`menu_idCurisine` = `b`.`idCurisine`)
+;
+
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `user`@`%` 
+    SQL SECURITY DEFINER
+VIEW `menucost` AS
+    SELECT 
+        `a`.`idCurisine` AS `idCurisine`,
+        SUM(`b`.`prodCost`) AS `menuCost`,
+        SUM(`b`.`prodPrice`) AS `menuPrice`
+    FROM
+        (`menu` `a`
+        JOIN `products` `b`)
+    WHERE
+        (`a`.`products_productID` = `b`.`productID`)
+    GROUP BY `a`.`idCurisine`
+;
+
+
+
+DELIMITER $$
+CREATE DEFINER=`user`@`%` FUNCTION `cancelOrder`( orderIFVar int ) RETURNS varchar(200) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN 
+ delete from orderdetail where Order_idOrder = orderIFVar;
+ delete from orders where idOrder = orderIFVar; 
+ delete from booking where Order_idOrder = orderIFVar;
+ Return 'oder' + str(orderIFVar) +' canceled';
+End$$
+DELIMITER ;
+
+CREATE DEFINER=`user`@`%` PROCEDURE `GetMaxQuantity`()
+select max(quantity) from orderdetail
+;
+
