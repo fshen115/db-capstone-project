@@ -1,0 +1,3 @@
+DB operation check list
+
+1. backup -- default auto -- how to check the time slot ? 
